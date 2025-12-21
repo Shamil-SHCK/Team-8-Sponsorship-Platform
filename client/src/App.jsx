@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
+import AdminPanel from './components/AdminPanel';
 import './App.css';
 
 function App() {
@@ -15,6 +16,10 @@ function App() {
         <Route
           path="/dashboard"
           element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/admin"
+          element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />}
         />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

@@ -42,6 +42,12 @@ const userSchema = new mongoose.Schema(
                 return this.role === 'company';
             },
         },
+        formerInstitution: {
+            type: String,
+            required: function () {
+                return this.role === 'alumni-individual';
+            },
+        },
         verificationStatus: {
             type: String,
             enum: ['pending', 'verified', 'rejected'],

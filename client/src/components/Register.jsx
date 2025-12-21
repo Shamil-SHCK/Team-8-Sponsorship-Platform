@@ -11,6 +11,7 @@ const Register = () => {
         role: 'club-admin',
         clubName: '',
         organizationName: '',
+        formerInstitution: '',
     });
 
     const [error, setError] = useState('');
@@ -18,7 +19,7 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const { name, email, password, confirmPassword, role, clubName, organizationName } = formData;
+    const { name, email, password, confirmPassword, role, clubName, organizationName, formerInstitution } = formData;
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,6 +51,11 @@ const Register = () => {
             return;
         }
 
+        if (role === 'alumni-individual' && !formerInstitution) {
+            setError('Former Institution is required for alumni registration');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -66,6 +72,10 @@ const Register = () => {
 
             if (role === 'company') {
                 userData.organizationName = organizationName;
+            }
+
+            if (role === 'alumni-individual') {
+                userData.formerInstitution = formerInstitution;
             }
 
             const data = await registerUser(userData);
@@ -184,6 +194,21 @@ const Register = () => {
                                 required
                                 style={styles.input}
                                 placeholder="Enter your company name"
+                            />
+                        </div>
+                    )}
+
+                    {role === 'alumni-individual' && (
+                        <div style={styles.formGroup}>
+                            <label style={styles.label}>Former Institution</label>
+                            <input
+                                type="text"
+                                name="formerInstitution"
+                                value={formerInstitution}
+                                onChange={handleChange}
+                                required
+                                style={styles.input}
+                                placeholder="Enter your former institution"
                             />
                         </div>
                     )}

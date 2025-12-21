@@ -6,7 +6,7 @@ import generateToken from '../utils/generateToken.js';
 // @access  Public
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, clubName, organizationName } = req.body;
+    const { name, email, password, role, clubName, organizationName, formerInstitution } = req.body;
 
     // Check if user exists
     const userExists = await User.findOne({ email });
@@ -24,12 +24,17 @@ export const registerUser = async (req, res) => {
     };
 
     // Add conditional fields based on role
-    if (role === 'club' && clubName) {
+    // Using correct role strings from enum
+    if (role === 'club-admin' && clubName) {
       userData.clubName = clubName;
     }
 
-    if (role === 'sponsor' && organizationName) {
+    if (role === 'company' && organizationName) {
       userData.organizationName = organizationName;
+    }
+
+    if (role === 'alumni-individual' && formerInstitution) {
+      userData.formerInstitution = formerInstitution;
     }
 
     // Create user
@@ -43,6 +48,7 @@ export const registerUser = async (req, res) => {
         role: user.role,
         clubName: user.clubName,
         organizationName: user.organizationName,
+        formerInstitution: user.formerInstitution,
         verificationStatus: user.verificationStatus,
         token: generateToken(user._id),
       });
@@ -73,6 +79,7 @@ export const loginUser = async (req, res) => {
         role: user.role,
         clubName: user.clubName,
         organizationName: user.organizationName,
+        formerInstitution: user.formerInstitution,
         verificationStatus: user.verificationStatus,
         token: generateToken(user._id),
       });
@@ -99,6 +106,7 @@ export const getMe = async (req, res) => {
       role: user.role,
       clubName: user.clubName,
       organizationName: user.organizationName,
+      formerInstitution: user.formerInstitution,
       verificationStatus: user.verificationStatus,
     });
   } catch (error) {
