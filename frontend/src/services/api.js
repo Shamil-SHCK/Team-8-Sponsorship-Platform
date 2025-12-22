@@ -188,3 +188,24 @@ export const updateUserProfile = async (userData) => {
 
   return data;
 };
+
+// Change user password
+export const changeUserPassword = async (passwordData) => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_URL}/auth/password`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(passwordData),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to change password');
+  }
+
+  return data;
+};
