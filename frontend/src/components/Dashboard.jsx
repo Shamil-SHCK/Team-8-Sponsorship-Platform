@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getCurrentUser, logoutUser } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import AdminPanel from './AdminPanel';
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
@@ -126,6 +127,13 @@ const Dashboard = () => {
                         <p>No recent activity.</p>
                     </div>
                 </div>
+
+                {user?.role === 'administrator' && (
+                    <div style={{ marginTop: '2rem' }}>
+                        <h3 style={{ marginBottom: '1rem', color: '#1e293b' }}>Administration</h3>
+                        <AdminPanel isEmbedded={true} />
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -32,16 +32,21 @@ const Login = () => {
             // Redirect after successful login
             setTimeout(() => {
                 const role = data.role;
-                if (role === 'administrator') {
-                    navigate('/admin');
-                } else if (role === 'company') {
-                    navigate('/company-dashboard');
-                } else if (role === 'club-admin') {
-                    navigate('/club-dashboard');
-                } else if (role === 'alumni-individual') {
-                    navigate('/alumni-dashboard');
-                } else {
-                    navigate('/dashboard');
+                switch (role) {
+                    case 'administrator':
+                        navigate('/dashboard');
+                        break;
+                    case 'company':
+                        navigate('/company-dashboard');
+                        break;
+                    case 'club-admin':
+                        navigate('/club-dashboard');
+                        break;
+                    case 'alumni-individual':
+                        navigate('/alumni-dashboard');
+                        break;
+                    default:
+                        navigate('/dashboard');
                 }
             }, 1000);
         } catch (err) {

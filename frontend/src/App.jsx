@@ -7,12 +7,34 @@ import AdminPanel from './components/AdminPanel';
 import LandingPage from './components/LandingPage';
 import './App.css';
 
-// Protected Route Component to ensure auth check happens on render
-const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = !!localStorage.getItem('token');
-  if (!isAuthenticated) {
+// Protected Route Component with Role-Based Access Control
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+
+  if (!token || !userStr) {
     return <Navigate to="/login" replace />;
   }
+
+  const user = JSON.parse(userStr);
+  const userRole = user.role;
+
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    // Redirect to the appropriate dashboard based on the user's role
+    switch (userRole) {
+      case 'administrator':
+        return <Navigate to="/dashboard" replace />;
+      case 'company':
+        return <Navigate to="/company-dashboard" replace />;
+      case 'club-admin':
+        return <Navigate to="/club-dashboard" replace />;
+      case 'alumni-individual':
+        return <Navigate to="/alumni-dashboard" replace />;
+      default:
+        return <Navigate to="/dashboard" replace />;
+    }
+  }
+
   return children;
 };
 
@@ -23,7 +45,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected Dashboard Routes */}
+        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -35,7 +57,7 @@ function App() {
         <Route
           path="/company-dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['company']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -43,7 +65,7 @@ function App() {
         <Route
           path="/club-dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['club-admin']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -51,7 +73,7 @@ function App() {
         <Route
           path="/alumni-dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['alumni-individual']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -68,7 +90,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['administrator']}>
               <AdminPanel />
             </ProtectedRoute>
           }
