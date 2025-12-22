@@ -11,12 +11,16 @@
 
 ---
 
+---
+
 ## 2. Directory Structure
 The project is organized into two main workspaces:
 - **`frontend/`**: Contains the React + Vite application.
+    - **`components/`**: Reusable UI parts (e.g., `AdminPanel`, `LandingPage`).
+    - **`services/`**: API handling logic.
 - **`backend/server/`**: Contains the Node.js + Express backend API.
+    - **`uploads/`**: Stores user-uploaded verification documents (Ignored by Git).
 - **`package.json`**: Root configuration to run both services simultaneously.
-- **`README.md`** & **`PROJECT_DOCUMENTATION.md`**: Project documentation.
 
 > **Note**: A `.gitignore` file is placed in the root to ensure `node_modules`, `.env`, and logs are not committed to version control.
 
@@ -28,45 +32,37 @@ The project is organized into two main workspaces:
 **Status**: ✅ Complete
 - **Roles**: `administrator`, `club-admin`, `company`, `alumni-individual`.
 - **Flow**:
-    - **Register**: Users sign up with specific roles.
-    - **Login**: Authenticates via `POST /api/auth/login`, returns JWT.
-    - **Protection**: `ProtectedRoute` component in React checks for token presence.
-    - **Verification**: New users start with `verificationStatus: 'pending'`.
+    - **Landing Page**: New entry point at `/` with options to Login or Register.
+    - **Login Redirection**:
+        - `administrator` -> `/dashboard` (with embedded Admin Panel).
+        - `company` -> `/company-dashboard`.
+        - `club-admin` -> `/club-dashboard`.
+        - `alumni-individual` -> `/alumni-dashboard`.
+    - **Protection**: `ProtectedRoute` checks for token AND `allowedRoles` to prevent unauthorized access.
 
 ### B. Dashboard & "Waiting Room"
 **Status**: ✅ Complete
 - **Logic**:
-    - If `verificationStatus === 'pending'`, user sees a "Application Under Review" screen (Yellow Theme).
-    - If `verificationStatus === 'rejected'`, user sees a "Application Rejected" screen (Red Theme).
-    - If `verified`, user sees the main dashboard content.
-- **Implementation**: Handled conditionally in `Dashboard.jsx`.
+    - **Pending**: "Application Under Review" screen.
+    - **Rejected**: "Application Rejected" screen.
+    - **Verified**: Main dashboard content.
+- **Role Integration**: The `Dashboard.jsx` serves as the container for all roles but renders specific content based on the user type.
+    - **Admins**: See the `AdminPanel` embedded directly within their dashboard.
 
 ### C. Profile Management
 **Status**: ✅ Complete
 - **Feature**: Users can edit their details (Phone, Logo, Bio, Organization Name).
 - **Password Change**: Users can securely change their passwords.
-    - Requires `Current Password` for verification.
-    - Validates `New Password` matches `Confirm Password` and meets length requirements.
-- **Backend**: `PUT /api/auth/profile` and `PUT /api/auth/password`.
-- **Frontend**: `Profile.jsx` allows users to view/save profile changes and update authentication credentials.
 
 ### D. Admin Panel
 **Status**: ✅ Complete
 - **Access**: Strictly restricted to users with `role: 'administrator'`.
-- **Features**:
-    1.  **View Pending**: default view, shows new registrations.
-    2.  **Approve/Reject**: Buttons to update `verificationStatus`.
-    3.  **View All Users**: Toggle filter to see entire user base.
-    4.  **Password Reset**: Admin can forced-reset any user's password to `ChangeMe@123` via the "Reset PW" button (No-Email Strategy).
-- **Security**: Backend `authorize('administrator')` middleware blocks unauthorized API requests. Frontend redirects unauthorized users to Login.
-
-### E. Secure Logout
-**Status**: ✅ Complete
-- **Mechanism**:
-    - Clears `localStorage` (Token, User Data).
-    - Clears `sessionStorage`.
-    - Resets React State (`users`, `user`) to prevents caching issues.
-    - Redirects immediately to `/login`.
+- **Integration**: Now acts as both a standalone component or an embedded widget within the Dashboard.
+- **Features**: 
+    1.  **View Pending/All Users**: List and filter users.
+    2.  **Document Viewer (New)**: Modal to view/zoom verification documents (Images & PDFs) directly in the app.
+    3.  **Approve/Reject**: Update user verification status.
+    4.  **Password Reset**: Admin can forced-reset any user's password to `ChangeMe@123`.
 
 ---
 
@@ -93,15 +89,33 @@ The project is organized into two main workspaces:
 
 ## 5. Frontend Structure (`frontend/src`)
 - **`components/`**:
+    - `LandingPage.jsx`: Main entry point with platform branding.
     - `Login.jsx` / `Register.jsx`: Auth forms with "Clean Enterprise" styling.
-    - `Dashboard.jsx`: Main landing page with "Waiting Room" logic.
+    - `Dashboard.jsx`: Role-agnostic container that adapts content based on user role.
     - `Profile.jsx`: User settings and Password Update form.
-    - `AdminPanel.jsx`: Management interface for admins.
+    - `AdminPanel.jsx`: Management interface with Document Viewer Modal.
 - **`services/`**:
     - `api.js`: Centralized fetch wrappers for all backend calls.
-- **`App.jsx`**: Routing definition with `ProtectedRoute` wrappers.
+- **`App.jsx`**: Routing definition with `ProtectedRoute` ensuring RBAC.
 
 ---
+
+## 6. Architecture & Deployment (New)
+
+### Database Hosting
+- **MongoDB Atlas**: Recommended for cloud database hosting.
+
+### Backend Hosting
+- **Cannot use GitHub Pages**: Node.js backends require dynamic server execution.
+- **Recommended**: Render, Railway, or Vercel (serverless adaptation).
+
+### Frontend Hosting
+- **GitHub Pages**: Fully supported for the React/Vite frontend.
+
+### Future Folder Structure
+As the project scales, we will adopt:
+- **`frontend/src/pages/`**: For full page views (e.g., `Home.jsx`, `Events.jsx`).
+- **`frontend/src/components/`**: Strictly for reusable, small UI widgets (Buttons, Cards).
 
 ## 6. How to Run
 
