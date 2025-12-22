@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getPendingUsers, getAllUsers, verifyUser, resetUserPassword, logoutUser } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
-const AdminPanel = () => {
+const AdminPanel = ({ isEmbedded = false }) => {
     const [users, setUsers] = useState([]);
     const [filter, setFilter] = useState('pending'); // 'pending' | 'all'
     const [error, setError] = useState('');
@@ -81,7 +81,7 @@ const AdminPanel = () => {
     if (loading) return <div style={styles.loading}>Loading...</div>;
 
     return (
-        <div style={styles.container}>
+        <div style={isEmbedded ? { ...styles.container, minHeight: 'auto' } : styles.container}>
             {/* Modal for viewing document */}
             {selectedDoc && (
                 <div style={styles.modalOverlay} onClick={closeModal}>
@@ -149,10 +149,12 @@ const AdminPanel = () => {
                 </div>
             )}
 
-            <header style={styles.header}>
-                <h1 style={styles.title}>Admin Verification Panel</h1>
-                <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
-            </header>
+            {!isEmbedded && (
+                <header style={styles.header}>
+                    <h1 style={styles.title}>Admin Verification Panel</h1>
+                    <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+                </header>
+            )}
 
             <div style={styles.content}>
                 {error && <div style={styles.error}>{error}</div>}
