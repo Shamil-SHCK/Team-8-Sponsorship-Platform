@@ -31,8 +31,15 @@ const Login = () => {
 
             // Redirect after successful login
             setTimeout(() => {
-                if (data.role === 'administrator') {
+                const role = data.role;
+                if (role === 'administrator') {
                     navigate('/admin');
+                } else if (role === 'company') {
+                    navigate('/company-dashboard');
+                } else if (role === 'club-admin') {
+                    navigate('/club-dashboard');
+                } else if (role === 'alumni-individual') {
+                    navigate('/alumni-dashboard');
                 } else {
                     navigate('/dashboard');
                 }
