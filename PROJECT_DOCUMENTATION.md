@@ -4,7 +4,7 @@
 **Name**: Team-8 Sponsorship Platform
 **Description**: A crowdfunding and sponsorship platform connecting students/alumni with clubs and companies.
 **Tech Stack**:
-- **Frontend**: React (Vite), CSS Modules/Vanilla CSS (Clean Enterprise Theme)
+- **Frontend**: React (Vite), Tailwind CSS v4 (via PostCSS), Lucide React Icons
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB (Mongoose ODM)
 - **Authentication**: JWT (JSON Web Tokens), bcryptjs
@@ -16,7 +16,7 @@
 ## 2. Directory Structure
 The project is organized into two main workspaces:
 - **`frontend/`**: Contains the React + Vite application.
-    - **`components/`**: Reusable UI parts (e.g., `AdminPanel`, `LandingPage`).
+    - **`components/`**: Reusable UI parts (`AdminPanel`, `DashboardLayout`) and specific Pages (`AdminDashboard`, `Register`, etc.).
     - **`services/`**: API handling logic.
 - **`backend/server/`**: Contains the Node.js + Express backend API.
     - **`uploads/`**: Stores user-uploaded verification documents (Ignored by Git).
@@ -31,38 +31,46 @@ The project is organized into two main workspaces:
 ### A. Authentication & User Roles
 **Status**: ✅ Complete
 - **Roles**: `administrator`, `club-admin`, `company`, `alumni-individual`.
+- **Registration Fields**:
+    - **Club Admin**: Requires `clubName` + Verification Document.
+    - **Company**: Requires `organizationName` + Verification Document.
+    - **Alumni**: Requires `formerInstitution`.
 - **Flow**:
     - **Landing Page**: New entry point at `/` with options to Login or Register.
     - **Login Redirection**:
-        - `administrator` -> `/dashboard` (with embedded Admin Panel).
-        - `company` -> `/company-dashboard`.
-        - `club-admin` -> `/club-dashboard`.
-        - `alumni-individual` -> `/alumni-dashboard`.
+        - `administrator` -> `/admin/dashboard`
+        - `company` -> `/company/dashboard`
+        - `club-admin` -> `/club/dashboard`
+        - `alumni-individual` -> `/alumni/dashboard`
     - **Protection**: `ProtectedRoute` checks for token AND `allowedRoles` to prevent unauthorized access.
 
-### B. Dashboard & "Waiting Room"
+### B. Dashboard & Layouts
 **Status**: ✅ Complete
-- **Logic**:
-    - **Pending**: "Application Under Review" screen.
-    - **Rejected**: "Application Rejected" screen.
-    - **Verified**: Main dashboard content.
-- **Role Integration**: The `Dashboard.jsx` serves as the container for all roles but renders specific content based on the user type.
-    - **Admins**: See the `AdminPanel` embedded directly within their dashboard.
+- **Structure**:
+    - **`DashboardLayout`**: A shared wrapper component providing the Sidebar, Top Navigation, and Mobile responsiveness for all authenticated views.
+    - **Role-Specific Views**:
+        - **`AdminDashboard`**: Quick stats + Embedded `AdminPanel` for user verification.
+        - **`CompanyDashboard`**: (Placeholder) Sponsorship management.
+        - **`ClubDashboard`**: (Placeholder) Proposal creation.
+        - **`AlumniDashboard`**: (Placeholder) Donation tracking.
+- **Admin Features**:
+    - **Document Viewer**: Modal to view/zoom verification documents (Images & PDFs).
+    - **Verification**: Approve/Reject users directly from the dashboard.
 
 ### C. Profile Management
 **Status**: ✅ Complete
 - **Feature**: Users can edit their details (Phone, Logo, Bio, Organization Name).
 - **Password Change**: Users can securely change their passwords.
 
-### D. Admin Panel
+### D. Admin Panel (Component)
 **Status**: ✅ Complete
 - **Access**: Strictly restricted to users with `role: 'administrator'`.
-- **Integration**: Now acts as both a standalone component or an embedded widget within the Dashboard.
+- **Integration**: Designed as a reusable `<AdminPanel />` component that takes an `isEmbedded` prop to adapt its layout (hiding headers when inside a dashboard).
 - **Features**: 
     1.  **View Pending/All Users**: List and filter users.
-    2.  **Document Viewer (New)**: Modal to view/zoom verification documents (Images & PDFs) directly in the app.
+    2.  **Document Viewer**: Integrated modal for proof verification.
     3.  **Approve/Reject**: Update user verification status.
-    4.  **Password Reset**: Admin can forced-reset any user's password to `ChangeMe@123`.
+    4.  **Password Reset**: Admin can forced-reset any user's password.
 
 ---
 
@@ -71,7 +79,7 @@ The project is organized into two main workspaces:
 ### Authentication (`/api/auth`)
 | Method | Endpoint | Description | Protected |
 | :--- | :--- | :--- | :--- |
-| POST | `/register` | Register new user | No |
+| POST | `/register` | Register new user (with file upload) | No |
 | POST | `/login` | Login user & get Token | No |
 | GET | `/me` | Get current user details | Yes |
 | PUT | `/profile` | Update user profile | Yes |
@@ -89,14 +97,18 @@ The project is organized into two main workspaces:
 
 ## 5. Frontend Structure (`frontend/src`)
 - **`components/`**:
-    - `LandingPage.jsx`: Main entry point with platform branding.
-    - `Login.jsx` / `Register.jsx`: Auth forms with "Clean Enterprise" styling.
-    - `Dashboard.jsx`: Role-agnostic container that adapts content based on user role.
-    - `Profile.jsx`: User settings and Password Update form.
-    - `AdminPanel.jsx`: Management interface with Document Viewer Modal.
+    - **Layouts**:
+        - `DashboardLayout.jsx`: Shared shell for authenticated pages.
+    - **Pages**:
+        - `LandingPage.jsx`: Main entry point.
+        - `AdminDashboard.jsx`, `CompanyDashboard.jsx`, etc.: Role-specific main views.
+        - `Login.jsx` / `Register.jsx`: Auth forms.
+        - `Profile.jsx`: User settings.
+    - **Widgets**:
+        - `AdminPanel.jsx`: Management table & document viewer.
 - **`services/`**:
-    - `api.js`: Centralized fetch wrappers for all backend calls.
-- **`App.jsx`**: Routing definition with `ProtectedRoute` ensuring RBAC.
+    - `api.js`: Centralized fetch wrappers.
+- **`App.jsx`**: Routing definition with `ProtectedRoute`.
 
 ---
 
@@ -114,8 +126,8 @@ The project is organized into two main workspaces:
 
 ### Future Folder Structure
 As the project scales, we will adopt:
-- **`frontend/src/pages/`**: For full page views (e.g., `Home.jsx`, `Events.jsx`).
-- **`frontend/src/components/`**: Strictly for reusable, small UI widgets (Buttons, Cards).
+- **`frontend/src/pages/`**: For full page views.
+- **`frontend/src/components/`**: Strictly for reusable widgets.
 
 ## 6. How to Run
 
