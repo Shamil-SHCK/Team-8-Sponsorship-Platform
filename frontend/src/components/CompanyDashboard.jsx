@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getCurrentUser, logoutUser } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
+import EventFeed from './EventFeed';
 import { Briefcase, CheckCircle, Search, TrendingUp } from 'lucide-react';
 
 const CompanyDashboard = () => {
@@ -76,15 +77,9 @@ const CompanyDashboard = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-12 text-center border dashed border-slate-200">
-                <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-8 h-8" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Explore Sponsorship Opportunities</h3>
-                <p className="text-slate-500 max-w-md mx-auto mb-6">Discover events that align with your brand values and reach your target audience.</p>
-                <button className="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">
-                    Find Events
-                </button>
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold font-heading text-slate-900 mb-6">Explore <span className="text-blue-600">Events</span></h2>
+                <EventFeed userType="company" />
             </div>
         </DashboardLayout>
     );
