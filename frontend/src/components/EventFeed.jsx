@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getEvents, sponsorEvent } from '../services/api';
 import { Rocket, Calendar, MapPin, DollarSign, X, Check, Search, Filter } from 'lucide-react';
 
-const EventFeed = ({ userType }) => {
+const EventFeed = ({ userType, onSponsorshipSuccess }) => {
     const [events, setEvents] = useState([]);
     const [filteredEvents, setFilteredEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,9 +20,9 @@ const EventFeed = ({ userType }) => {
             try {
                 const data = await getEvents();
                 // Filter out closed or completed events if needed, for now show all open
-                const openEvents = data.filter(e => e.status === 'open');
-                setEvents(openEvents);
-                setFilteredEvents(openEvents);
+                // const openEvents = data.filter(e => e.status === 'open');
+                setEvents(data); // Store all data to allow filtering later if needed
+                setFilteredEvents(data);
             } catch (error) {
                 console.error('Failed to fetch events', error);
             } finally {
@@ -72,6 +72,9 @@ const EventFeed = ({ userType }) => {
             });
 
             setEvents(updatedEvents);
+
+            if (onSponsorshipSuccess) onSponsorshipSuccess();
+
             setShowSponsorModal(false);
             alert(`Successfully sponsored ${selectedEvent.title} for ₹${sponsorAmount}!`);
         } catch (error) {
@@ -188,9 +191,10 @@ const EventFeed = ({ userType }) => {
                                     )}
                                     <button
                                         onClick={() => handleSponsorClick(event)}
-                                        className={`px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 ${!event.brochure ? 'col-span-2' : ''}`}
+                                        disabled={event.status !== 'open'}
+                                        className={`px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed ${!event.brochure ? 'col-span-2' : ''}`}
                                     >
-                                        Sponsor Now
+                                        {event.status === 'open' ? 'Sponsor Now' : 'Closed'}
                                     </button>
                                 </div>
                             </div>
