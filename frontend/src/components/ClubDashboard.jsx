@@ -9,8 +9,15 @@ const ClubDashboard = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [showSponsorsModal, setShowSponsorsModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
+
+    const handleViewSponsors = (event) => {
+        setSelectedEvent(event);
+        setShowSponsorsModal(true);
+    };
 
     const [formData, setFormData] = useState({
         title: '',
@@ -201,12 +208,69 @@ const ClubDashboard = () => {
                                         ></div>
                                     </div>
                                 </div>
-                                <button className="w-full py-2.5 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
-                                    Manage Event
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleViewSponsors(event)}
+                                        className="flex-1 py-2.5 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                                    >
+                                        Sponsors
+                                    </button>
+                                    <button className="flex-1 py-2.5 rounded-lg bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">
+                                        Edit
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* View Sponsors Modal */}
+            {showSponsorsModal && selectedEvent && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl relative shadow-2xl animate-fadeIn my-8">
+                        <button
+                            onClick={() => setShowSponsorsModal(false)}
+                            className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <div className="p-8 border-b border-slate-100">
+                            <h2 className="text-2xl font-bold font-heading text-slate-900">Sponsors</h2>
+                            <p className="text-slate-500">Companies supporting <strong>{selectedEvent.title}</strong>.</p>
+                        </div>
+
+                        <div className="p-8">
+                            {selectedEvent.sponsors && selectedEvent.sponsors.length > 0 ? (
+                                <div className="space-y-4">
+                                    {selectedEvent.sponsors.map((s, index) => (
+                                        <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-slate-200 text-slate-400 font-bold overflow-hidden">
+                                                    {s.sponsor?.logoUrl ? <img src={s.sponsor.logoUrl} alt="logo" className="w-full h-full object-cover" /> : (s.sponsor?.organizationName?.[0] || 'C')}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-slate-900">{s.sponsor?.organizationName || s.sponsor?.name || 'Unknown Sponsor'}</h4>
+                                                    <p className="text-xs text-slate-500">{new Date(s.date).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-lg font-bold text-green-600">+₹{s.amount.toLocaleString()}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 text-slate-500">
+                                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                                        <DollarSign className="w-8 h-8" />
+                                    </div>
+                                    <p>No sponsors yet.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
 
