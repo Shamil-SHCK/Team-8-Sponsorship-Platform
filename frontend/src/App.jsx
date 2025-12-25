@@ -9,6 +9,7 @@ import AlumniDashboard from './components/AlumniDashboard';
 import Profile from './components/Profile';
 import AdminPanel from './components/AdminPanel';
 import LandingPage from './components/LandingPage';
+import DashboardLayout from './components/DashboardLayout';
 import './App.css';
 
 // Protected Route Component with Role-Based Access Control
@@ -49,51 +50,52 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
-
-        {/* Protected Routes */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['administrator']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/company/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['company']}>
-              <CompanyDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/club/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['club-admin']}>
-              <ClubDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/alumni/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['alumni-individual']}>
-              <AlumniDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute allowedRoles={['administrator', 'company', 'club-admin', 'alumni-individual']}>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-
         <Route path="/" element={<LandingPage />} />
+
+        {/* Persistent Dashboard Layout */}
+        <Route element={<DashboardLayout />}>
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['administrator']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['company']}>
+                <CompanyDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/club/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['club-admin']}>
+                <ClubDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/alumni/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['alumni-individual']}>
+                <AlumniDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={['administrator', 'company', 'club-admin', 'alumni-individual']}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
       </Routes>
     </Router>
   );

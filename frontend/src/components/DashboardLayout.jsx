@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { logoutUser } from '../services/api';
+import { useState, useEffect } from 'react';
+import { useNavigate, Outlet } from 'react-router-dom';
+import { logoutUser, getCurrentUser } from '../services/api';
 import {
     LayoutDashboard,
     LogOut,
@@ -10,14 +10,40 @@ import {
     Menu,
 } from 'lucide-react';
 
-const DashboardLayout = ({ children, user, title = "Dashboard" }) => {
+const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const data = await getCurrentUser();
+                setUser(data);
+            } catch (error) {
+                console.error('Failed to fetch user', error);
+                logoutUser();
+                navigate('/login');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUser();
+    }, [navigate]);
 
     const handleLogout = () => {
         logoutUser();
         navigate('/');
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans flex">
@@ -36,7 +62,7 @@ const DashboardLayout = ({ children, user, title = "Dashboard" }) => {
                     <div className="flex-1 py-6 px-4 space-y-2">
                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 px-2">Menu</div>
 
-                        <button onClick={() => navigate(`/${user?.role === 'administrator' ? 'admin' : user?.role === 'club-admin' ? 'club' : user?.role === 'alumni-individual' ? 'alumni' : 'company'}/dashboard`)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all ${title === 'Dashboard' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+                        <button onClick={() => navigate(`/${user?.role === 'administrator' ? 'admin' : user?.role === 'club-admin' ? 'club' : user?.role === 'alumni-individual' ? 'alumni' : 'company'}/dashboard`)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-800`}>
                             <LayoutDashboard className="w-5 h-5" /> Dashboard
                         </button>
 
@@ -97,7 +123,7 @@ const DashboardLayout = ({ children, user, title = "Dashboard" }) => {
                 </header>
 
                 <div className="flex-1 p-6 lg:p-10 overflow-x-hidden">
-                    {children}
+                    <Outlet context={{ user }} />
                 </div>
             </main>
         </div>

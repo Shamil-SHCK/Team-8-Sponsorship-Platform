@@ -1,43 +1,11 @@
-import { useState, useEffect } from 'react';
-import { getCurrentUser, logoutUser } from '../services/api';
-import { useNavigate } from 'react-router-dom';
-import DashboardLayout from './DashboardLayout';
+import { useOutletContext } from 'react-router-dom';
 import { Rocket, Target, DollarSign, Calendar } from 'lucide-react';
 
 const ClubDashboard = () => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const data = await getCurrentUser();
-                if (data.role !== 'club-admin') {
-                    navigate('/login');
-                    return;
-                }
-                setUser(data);
-            } catch (error) {
-                console.error('Failed to fetch user', error);
-                logoutUser();
-                navigate('/login');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUser();
-    }, [navigate]);
-
-    if (loading) return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-    );
+    const { user } = useOutletContext();
 
     return (
-        <DashboardLayout user={user}>
+        <>
             <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-3xl lg:text-4xl font-bold font-heading text-slate-900 mb-2">
@@ -94,7 +62,7 @@ const ClubDashboard = () => {
                     Create Event
                 </button>
             </div>
-        </DashboardLayout>
+        </>
     );
 };
 
