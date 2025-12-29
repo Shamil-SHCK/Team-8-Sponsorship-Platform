@@ -27,7 +27,7 @@ The project is organized into two main workspaces:
         - `eventController.js`: CRUD for events & sponsorship logic.
         - `fileController.js`: Serving images/PDFs from DB.
         - `adminController.js`: User verification.
-    - **`models/`**: `User`, `Event`, `PendingUser`.
+    - **`models/`**: `User`, `Profile`, `Event`, `PendingUser`.
 - **`package.json`**: Root configuration to run both services simultaneously.
 
 ---
@@ -38,6 +38,7 @@ The project is organized into two main workspaces:
 **Status**: ✅ Complete
 - **Roles**: `administrator`, `club-admin`, `company`, `alumni-individual`.
 - **Flow**: Registration -> Email/OTP Verification (Simulated) -> Admin Approval -> Active.
+- **Data Structure**: `User` model handles auth, while `Profile` model stores role-specific details (Club Name, Organization Name, etc.).
 
 ### B. Dashboard & Layouts
 **Status**: ✅ Complete
@@ -48,7 +49,7 @@ The project is organized into two main workspaces:
 
 ### C. Event Management
 **Status**: ✅ Complete
-- **CRUD**: specific `createEvent`, `updateEvent`, `getEvents` (public), `getEventById`.
+- **CRUD**: Full lifecycle `createEvent`, `updateEvent`, `deleteEvent`, `getEvents` (public), `getEventById`.
 - **File Uploads**: Posters (Image) and Brochures (PDF) are uploaded and stored as binary Buffers in MongoDB.
 - **Serving**: Files are served via `/api/files/event/:id/:type` endpoints.
 
@@ -82,6 +83,7 @@ The project is organized into two main workspaces:
 | GET | `/` | Get All Events | Public |
 | GET | `/:id` | Get Single Event | Public |
 | PUT | `/:id` | Update Event | Organizer/Admin |
+| DELETE | `/:id` | Delete Event | Organizer/Admin |
 | POST | `/:id/sponsor` | Sponsor Event | Company/Alumni |
 
 ### Files (`/api/files`)
