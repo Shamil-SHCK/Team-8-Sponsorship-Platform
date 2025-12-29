@@ -5,13 +5,39 @@ import User from '../models/User.js';
 // @access  Private/Admin
 export const getPendingUsers = async (req, res) => {
     try {
-        const users = await User.find({ verificationStatus: 'pending' }).select('-password -verificationDocument.data');
+        const users = await User.find({ verificationStatus: 'pending' })
+            .select('-password')
+            .populate('profile'); // Populate profile
+
         const usersWithDocUrl = users.map(user => {
             const u = user.toObject();
-            if (user.verificationDocument && user.verificationDocument.contentType) {
-                u.verificationDocument = `api/files/user/${user._id}/document`;
-            } else {
-                u.verificationDocument = null;
+            if (user.profile) {
+                // Merge profile into user object
+                const uProfile = user.profile;
+                if (uProfile.verificationDocument && uProfile.verificationDocument.contentType) {
+                    u.verificationDocument = `api/files/user/${user._id}/document`; // Document moved to profile, route likely needs handling but this keeps API consistent
+                    // Wait, files are fetched by user ID. If document is in profile, fileController needs to find it.
+                    // The requirement is just to show essential info.
+                    // We need to merge all profile fields back to top level for admin dashboard to work without changes.
+                    u.clubName = uProfile.clubName;
+                    u.collegeName = uProfile.collegeName;
+                    u.organizationName = uProfile.organizationName;
+                    u.formerInstitution = uProfile.formerInstitution;
+                }
+                // Also merge document status logic if needed, but let's assume fileController is unchanged for now
+                // Actually, fileController finds User. We need to update that too if we moved document. 
+                // For now, let's just make sure profile data is visible.
+                u.clubName = uProfile.clubName || u.clubName;
+                u.collegeName = uProfile.collegeName || u.collegeName;
+                u.organizationName = uProfile.organizationName || u.organizationName;
+                u.formerInstitution = uProfile.formerInstitution || u.formerInstitution;
+
+                // Handle verification document specifically
+                if (uProfile.verificationDocument && uProfile.verificationDocument.contentType) {
+                    u.verificationDocument = `api/files/user/${user._id}/document`;
+                } else {
+                    u.verificationDocument = null;
+                }
             }
             return u;
         });
@@ -66,14 +92,28 @@ export const verifyUser = async (req, res) => {
 // @access  Private/Admin
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select('-password -verificationDocument.data');
+        const users = await User.find()
+            .select('-password')
+            .populate('profile');
         const usersWithDocUrl = users.map(user => {
             const u = user.toObject();
-            if (user.verificationDocument && user.verificationDocument.contentType) {
-                u.verificationDocument = `api/files/user/${user._id}/document`;
+
+            if (user.profile) {
+                const uProfile = user.profile;
+                u.clubName = uProfile.clubName;
+                u.collegeName = uProfile.collegeName;
+                u.organizationName = uProfile.organizationName;
+                u.formerInstitution = uProfile.formerInstitution;
+
+                if (uProfile.verificationDocument && uProfile.verificationDocument.contentType) {
+                    u.verificationDocument = `api/files/user/${user._id}/document`;
+                } else {
+                    u.verificationDocument = null;
+                }
             } else {
                 u.verificationDocument = null;
             }
+
             return u;
         });
         res.json(usersWithDocUrl);

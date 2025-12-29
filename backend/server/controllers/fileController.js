@@ -5,21 +5,33 @@ import PendingUser from '../models/PendingUser.js';
 // @desc    Get user verification document
 // @route   GET /api/files/user/:id/document
 // @access  Private (Admin or Owner)
+// @desc    Get user verification document
+// @route   GET /api/files/user/:id/document
+// @access  Private (Admin or Owner)
 export const getUserDocument = async (req, res) => {
     try {
-        let user = await User.findById(req.params.id);
+        let user = await User.findById(req.params.id).populate('profile');
 
-        // If not in main User, check PendingUser (for admin verification)
-        if (!user) {
-            user = await PendingUser.findById(req.params.id);
+        let doc = null;
+
+        if (user && user.profile) {
+            doc = user.profile.verificationDocument;
         }
 
-        if (!user || !user.verificationDocument || !user.verificationDocument.data) {
+        // If not in main User or Profile, check PendingUser (for admin verification during registration)
+        if (!doc) {
+            const pendingUser = await PendingUser.findById(req.params.id);
+            if (pendingUser) {
+                doc = pendingUser.verificationDocument;
+            }
+        }
+
+        if (!doc || !doc.data) {
             return res.status(404).send('Document not found');
         }
 
-        res.set('Content-Type', user.verificationDocument.contentType);
-        res.send(user.verificationDocument.data);
+        res.set('Content-Type', doc.contentType);
+        res.send(doc.data);
     } catch (error) {
         console.error(error);
         res.status(500).send('Server Error');

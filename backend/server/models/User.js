@@ -30,47 +30,14 @@ const userSchema = new mongoose.Schema(
             enum: ['administrator', 'club-admin', 'alumni-individual', 'company'],
             default: 'club-admin',
         },
-        clubName: {
-            type: String,
-            required: function () {
-                return this.role === 'club-admin';
-            },
-        },
-        collegeName: {
-            type: String,
-            required: function () {
-                return this.role === 'club-admin';
-            },
-        },
-        organizationName: {
-            type: String,
-            required: function () {
-                return this.role === 'company';
-            },
-        },
-        formerInstitution: {
-            type: String,
-            required: function () {
-                return this.role === 'alumni-individual';
-            },
+        profile: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Profile'
         },
         verificationStatus: {
             type: String,
             enum: ['pending', 'verified', 'rejected'],
             default: 'pending',
-        },
-        phone: {
-            type: String,
-        },
-        logoUrl: {
-            type: String,
-        },
-        verificationDocument: {
-            data: Buffer,
-            contentType: String
-        },
-        description: {
-            type: String,
         },
         isEmailVerified: {
             type: Boolean,

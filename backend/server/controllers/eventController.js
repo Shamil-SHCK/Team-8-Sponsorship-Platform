@@ -60,11 +60,22 @@ export const getEvents = async (req, res) => {
     try {
         const events = await Event.find()
             .select('-poster.data -brochure.data')
-            .populate('organizer', 'name clubName logoUrl')
+            .populate({
+                path: 'organizer',
+                select: 'name profile',
+                populate: { path: 'profile', select: 'clubName logoUrl' }
+            })
             .sort({ date: 1 }); // Sort by date (nearest first)
 
         const eventsWithUrls = events.map(event => {
             const e = event.toObject();
+
+            // Flatten organizer profile into organizer object if profile exists
+            if (e.organizer && e.organizer.profile) {
+                e.organizer = { ...e.organizer, ...e.organizer.profile };
+                delete e.organizer.profile;
+            }
+
             if (event.poster && event.poster.contentType) {
                 e.poster = `api/files/event/${event._id}/poster`;
             } else {
@@ -92,11 +103,37 @@ export const getEventById = async (req, res) => {
     try {
         const event = await Event.findById(req.params.id)
             .select('-poster.data -brochure.data')
-            .populate('organizer', 'name clubName description logoUrl')
-            .populate('sponsors.sponsor', 'name organizationName formerInstitution logoUrl role');
+            .populate({
+                path: 'organizer',
+                select: 'name profile',
+                populate: { path: 'profile', select: 'clubName description logoUrl' }
+            })
+            .populate({
+                path: 'sponsors.sponsor',
+                select: 'name role profile',
+                populate: { path: 'profile', select: 'organizationName formerInstitution logoUrl' }
+            });
 
         if (event) {
             const e = event.toObject();
+
+            // Flatten organizer profile
+            if (e.organizer && e.organizer.profile) {
+                e.organizer = { ...e.organizer, ...e.organizer.profile };
+                delete e.organizer.profile;
+            }
+
+            // Flatten sponsor profiles
+            if (e.sponsors) {
+                e.sponsors = e.sponsors.map(s => {
+                    if (s.sponsor && s.sponsor.profile) {
+                        s.sponsor = { ...s.sponsor, ...s.sponsor.profile };
+                        delete s.sponsor.profile;
+                    }
+                    return s;
+                });
+            }
+
             if (event.poster && event.poster.contentType) e.poster = `api/files/event/${event._id}/poster`;
             else e.poster = null;
 

@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import PendingUser from '../models/PendingUser.js';
+import Profile from '../models/Profile.js';
 import generateToken from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import crypto from 'crypto';
@@ -128,11 +129,34 @@ export const verifyOTP = async (req, res) => {
       description: pendingUser.description
     };
 
-    // Create new user in main collection
-    // This will trigger the pre-save hook in User model which hashes the password
-    const user = await User.create(userData);
+    // Create new user in main collection (Essentials only)
+    const user = await User.create({
+      name: pendingUser.name,
+      email: pendingUser.email,
+      password: pendingUser.password,
+      role: pendingUser.role,
+      isEmailVerified: true,
+      verificationStatus: 'pending'
+    });
 
-    // Calculate token immediately (since we have the new user _id)
+    // Create Profile with detailed info
+    const profile = await Profile.create({
+      user: user._id,
+      clubName: pendingUser.clubName,
+      collegeName: pendingUser.collegeName,
+      organizationName: pendingUser.organizationName,
+      formerInstitution: pendingUser.formerInstitution,
+      verificationDocument: pendingUser.verificationDocument,
+      phone: pendingUser.phone,
+      logoUrl: pendingUser.logoUrl,
+      description: pendingUser.description
+    });
+
+    // Link profile to user
+    user.profile = profile._id;
+    await user.save();
+
+    // Calculate token
     const token = generateToken(user._id);
 
     // Delete pending user
@@ -143,13 +167,14 @@ export const verifyOTP = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      clubName: user.clubName,
-      collegeName: user.collegeName,
-      organizationName: user.organizationName,
-      formerInstitution: user.formerInstitution,
+      // Spread profile properties for frontend compatibility
+      clubName: profile.clubName,
+      collegeName: profile.collegeName,
+      organizationName: profile.organizationName,
+      formerInstitution: profile.formerInstitution,
       verificationStatus: user.verificationStatus,
       token: token,
-      verificationDocument: user.verificationDocument ? `api/files/user/${user._id}/document` : null
+      verificationDocument: profile.verificationDocument ? `api/files/user/${user._id}/document` : null
     });
 
   } catch (error) {
@@ -175,17 +200,26 @@ export const loginUser = async (req, res) => {
       //   return res.status(401).json({ message: 'Please verify your email to log in.' });
       // }
 
+      // Populate profile to return merged data
+      await user.populate('profile');
+
+      const profile = user.profile || {};
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        clubName: user.clubName,
-        collegeName: user.collegeName,
-        organizationName: user.organizationName,
-        formerInstitution: user.formerInstitution,
         verificationStatus: user.verificationStatus,
         token: generateToken(user._id),
+        // Spread profile fields
+        clubName: profile.clubName,
+        collegeName: profile.collegeName,
+        organizationName: profile.organizationName,
+        formerInstitution: profile.formerInstitution,
+        phone: profile.phone,
+        logoUrl: profile.logoUrl,
+        description: profile.description
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -201,18 +235,23 @@ export const loginUser = async (req, res) => {
 // @access  Private
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).populate('profile');
+    const profile = user.profile || {};
 
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      clubName: user.clubName,
-      collegeName: user.collegeName,
-      organizationName: user.organizationName,
-      formerInstitution: user.formerInstitution,
       verificationStatus: user.verificationStatus,
+      // Profile fields
+      clubName: profile.clubName,
+      collegeName: profile.collegeName,
+      organizationName: profile.organizationName,
+      formerInstitution: profile.formerInstitution,
+      phone: profile.phone,
+      logoUrl: profile.logoUrl,
+      description: profile.description
     });
   } catch (error) {
     console.error(error);
@@ -238,25 +277,37 @@ export const updateProfile = async (req, res) => {
         return obj;
       }, {});
 
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
+    // Check if user has a profile, if not create one (migration safety)
+    let user = await User.findById(req.user._id);
+    if (!user.profile) {
+      const newProfile = await Profile.create({ user: user._id });
+      user.profile = newProfile._id;
+      await user.save();
+    }
+
+    const profile = await Profile.findOneAndUpdate(
+      { user: req.user._id },
       { $set: updates },
-      { new: true, runValidators: true }
-    ).select('-password');
+      { new: true, upsert: true }
+    );
+
+    // Fetch refreshed user info
+    user = await User.findById(req.user._id).select('-password');
 
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      clubName: user.clubName,
-      collegeName: user.collegeName,
-      organizationName: user.organizationName,
-      formerInstitution: user.formerInstitution,
       verificationStatus: user.verificationStatus,
-      phone: user.phone,
-      logoUrl: user.logoUrl,
-      description: user.description
+      // Merged profile
+      clubName: profile.clubName,
+      collegeName: profile.collegeName,
+      organizationName: profile.organizationName,
+      formerInstitution: profile.formerInstitution,
+      phone: profile.phone,
+      logoUrl: profile.logoUrl,
+      description: profile.description
     });
   } catch (err) {
     console.error(err);
