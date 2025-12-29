@@ -46,7 +46,6 @@ const DashboardLayout = ({ children, user, title = "Dashboard" }) => {
 
                         <button className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
                             <Bell className="w-5 h-5" /> Notifications
-                            <span className="ml-auto bg-red-500 text-white text-xs py-0.5 px-2 rounded-full">2</span>
                         </button>
 
                         <button className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
