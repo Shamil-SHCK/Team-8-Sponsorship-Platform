@@ -142,6 +142,7 @@ export const verifyOTP = async (req, res) => {
     // Create Profile with detailed info
     const profile = await Profile.create({
       user: user._id,
+      name: pendingUser.name,
       clubName: pendingUser.clubName,
       collegeName: pendingUser.collegeName,
       organizationName: pendingUser.organizationName,

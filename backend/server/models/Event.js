@@ -39,7 +39,11 @@ const eventSchema = mongoose.Schema({
     sponsors: [{
         sponsor: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'Profile'
+        },
+        name: {
+            type: String,
+            required: false
         },
         amount: {
             type: Number,

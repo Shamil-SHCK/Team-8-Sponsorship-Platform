@@ -1,5 +1,6 @@
 import Event from '../models/Event.js';
 import User from '../models/User.js';
+import Profile from '../models/Profile.js';
 
 // @desc    Create new event
 // @route   POST /api/events
@@ -221,9 +222,20 @@ export const sponsorEvent = async (req, res) => {
         if (event.status !== 'open') {
             return res.status(400).json({ message: 'Event is not open for sponsorship' });
         }
-
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        console.log(user.profile);
+        const profile = await Profile.findById(user.profile);
+        console.log(profile);
+        console.log(profile.name)
+        if (!profile) {
+            return res.status(404).json({ message: 'Profile not found' });
+        }
         const sponsorship = {
-            sponsor: req.user._id,
+            sponsor: user.profile,
+            name: profile.name? profile.name : profile.organizationName? profile.organizationName : "",
             amount: Number(amount),
             date: Date.now()
         };

@@ -292,10 +292,10 @@ const ClubDashboard = () => {
                                         <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-slate-200 text-slate-400 font-bold overflow-hidden">
-                                                    {s.sponsor?.logoUrl ? <img src={s.sponsor.logoUrl} alt="logo" className="w-full h-full object-cover" /> : (s.sponsor?.organizationName?.[0] || 'C')}
+                                                    {s.sponsor.logoUrl ? <img src={s.sponsor.logoUrl} alt="logo" className="w-full h-full object-cover" /> : (s.name?s.name[0] : 'C')}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-slate-900">{s.sponsor?.organizationName || s.sponsor?.name || 'Unknown Sponsor'}</h4>
+                                                    <h4 className="font-bold text-slate-900">{/*{s.organizationName?.organizationName || s.name?.name || 'Unknown Sponsor'}*/}{s.name? s.name : 'Unknown Sponsor'}</h4>
                                                     <p className="text-xs text-slate-500">{new Date(s.date).toLocaleDateString()}</p>
                                                 </div>
                                             </div>

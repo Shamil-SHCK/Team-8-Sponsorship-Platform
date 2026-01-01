@@ -8,6 +8,9 @@ const profileSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
+        name: {
+            type: String,
+        },
         clubName: {
             type: String
         },
