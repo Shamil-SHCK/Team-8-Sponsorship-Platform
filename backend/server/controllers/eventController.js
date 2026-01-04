@@ -1,9 +1,9 @@
 import Event from '../models/Event.js';
 import User from '../models/User.js';
-import Profile from '../models/Profile.js';
 import ClubProfile from '../models/ClubProfile.js';
 import AlumniProfile from '../models/AlumniProfile.js';
 import CompanyProfile from '../models/CompanyProfile.js';
+import { getUserProfile } from '../utils/UserProfilesHandler.js';
 
 // @desc    Create new event
 // @route   POST /api/events
@@ -42,6 +42,20 @@ export const createEvent = async (req, res) => {
             poster,
             brochure
         });
+        
+        // Link Event With the Profile
+        const profile = await getUserProfile(req.user);
+        if (profile) {
+            const eventData = {
+                event: event._id
+            }
+            profile.events.push(eventData);
+            await profile.save();
+        }
+        if(!profile){
+            res.status(404).json({ message: 'Profile not found' });
+        }
+
 
         // Return object with URLs
         const e = event.toObject();
@@ -77,12 +91,14 @@ export const getEvents = async (req, res) => {
 
             // Flatten organizer profile into organizer object if profile exists
             if (e.organizer && e.organizer.profile) {
+                console.log(e.organizer)
                 const organizerId = e.organizer._id; // Preserve User ID
                 e.organizer = { ...e.organizer, ...e.organizer.profile };
                 e.organizer._id = organizerId; // Restore User ID
-                delete e.organizer.profile;
+                // delete e.organizer.profile;
+                 e.organizer.clubName = e.organizer.profile.clubName;
             }
-
+           
             if (event.poster && event.poster.contentType) {
                 e.poster = `api/files/event/${event._id}/poster`;
             } else {
@@ -280,7 +296,15 @@ export const deleteEvent = async (req, res) => {
             return res.status(401).json({ message: 'Not authorized to delete this event' });
         }
 
+        //Acces Event organizer profile
+        const user = await User.findById(event.organizer);
+        const profile = await getUserProfile(user);
+        if (!profile) {
+            return res.status(404).json({ message: 'Profile not found' });
+        }
         await Event.deleteOne({ _id: event._id });
+        await profile.events.pull({ event: event._id});
+        await profile.save();
 
         res.json({ message: 'Event removed' });
     } catch (error) {

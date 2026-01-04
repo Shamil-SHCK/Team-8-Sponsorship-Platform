@@ -145,32 +145,8 @@ export const verifyOTP = async (req, res) => {
     }); 
     
     // Create Profile with detailed info
-    let profile = await createUserProfile(pendingUser) ;
-    // if(pendingUser.role ==='club-admin'){
-    //     profile = await ClubProfile.create({
-    //     user: user._id,
-    //     name: pendingUser.name,
-    //     email:pendingUser.email,
-    //     clubName: pendingUser.clubName,
-    //     collegeName: pendingUser.collegeName
-    //   });
-    // }
-    // if(pendingUser.role ==='company'){
-    //    profile = await CompanyProfile.create({
-    //     user: user._id,
-    //     name: pendingUser.name,
-    //     email:pendingUser.email,
-    //     organizationName: pendingUser.organizationName
-    //   });
-    // }
-    // if(pendingUser.role ==='alumni-individual'){
-    //    profile = await AlumniProfile.create({
-    //     user: user._id,
-    //     name: pendingUser.name,
-    //     email: pendingUser.email,
-    //     formerInstitution: pendingUser.formerInstitution
-    //   });
-    // }
+    let profile = await createUserProfile(pendingUser, user) ;
+   
 
     console.log("profile created")
     console.log(profile)

@@ -123,11 +123,14 @@ const ClubDashboard = () => {
     const handleDeleteEvent = async (eventId) => {
         if (window.confirm('Are you sure you want to delete this event?')) {
             try {
+                setLoading(true)
                 await deleteEvent(eventId);
                 setEvents(events.filter(e => e._id !== eventId));
             } catch (error) {
                 console.error(error);
                 alert('Failed to delete event');
+            }finally{
+                setLoading(false)
             }
         }
     };

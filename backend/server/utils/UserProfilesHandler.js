@@ -10,26 +10,26 @@ export const getUserProfile = async (user) => {
     return profile;
 }
 
-export const createUserProfile = async (user) =>{
+export const createUserProfile = async (pendingUser, user) =>{
     try{
         let profile;
-        const profileData = {
+        const profileData = {  
             user: user._id,
-            name: user.name,
-            email: user.email,
+            name: pendingUser.name,
+            email: pendingUser.email,
         }
-        if(user.role === 'club-admin'){
-            profileData.collegeName = user.collegeName
-            profileData.clubName = user.clubName
+        if(pendingUser.role === 'club-admin'){
+            profileData.collegeName = pendingUser.collegeName
+            profileData.clubName = pendingUser.clubName
             profile = await ClubProfile.create(profileData)
             
         }
-        if(user.role === 'company'){
-            profileData.organizationName = user.organizationName
+        if(pendingUser.role === 'company'){
+            profileData.organizationName = pendingUser.organizationName
             profile = await CompanyProfile.create(profileData)
         }
-        if(user.role === 'alumni-individual'){
-            profileData.formerInstitution = user.formerInstitution
+        if(pendingUser.role === 'alumni-individual'){
+            profileData.formerInstitution = pendingUser.formerInstitution
             profile = await AlumniProfile.create(profileData)
         }
         
