@@ -4,37 +4,41 @@ import AlumniProfile from "../models/AlumniProfile.js";
 
 export const getUserProfile = async (user) => {
     let profile;
-    if(user.role === 'club-admin') profile = await ClubProfile.findById(user.profile);
-    if(user.role === 'company') profile = await CompanyProfile.findById(user.profile);
-    if(user.role === 'alumni-individual') profile = await AlumniProfile.findById(user.profile);
+    if (user.role === 'club-admin') profile = await ClubProfile.findOne({ user: user._id });
+    if (user.role === 'company') profile = await CompanyProfile.findOne({ user: user._id });
+    if (user.role === 'alumni-individual') profile = await AlumniProfile.findOne({ user: user._id });
     return profile;
 }
 
-export const createUserProfile = async (user) =>{
-    try{
+export const createUserProfile = async (userData, userId) => {
+    try {
+        console.log("Creating user profile for:", userId);
+        console.log("UserData received:", JSON.stringify(userData, null, 2));
+
         let profile;
         const profileData = {
-            user: user._id,
-            name: user.name,
-            email: user.email,
+            user: userId || userData._id,
+            name: userData.name,
+            email: userData.email,
         }
-        if(user.role === 'club-admin'){
-            profileData.collegeName = user.collegeName
-            profileData.clubName = user.clubName
+        if (userData.role === 'club-admin') {
+            profileData.collegeName = userData.collegeName
+            profileData.clubName = userData.clubName
             profile = await ClubProfile.create(profileData)
-            
+
         }
-        if(user.role === 'company'){
-            profileData.organizationName = user.organizationName
+        if (userData.role === 'company') {
+            profileData.organizationName = userData.organizationName
             profile = await CompanyProfile.create(profileData)
         }
-        if(user.role === 'alumni-individual'){
-            profileData.formerInstitution = user.formerInstitution
+        if (userData.role === 'alumni-individual') {
+            profileData.formerInstitution = userData.formerInstitution
             profile = await AlumniProfile.create(profileData)
         }
-        
+
         return profile
-    }catch(error){
-        console.log(error)
+    } catch (error) {
+        console.error("Error creating user profile:", error);
+        throw error;
     }
 }

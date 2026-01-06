@@ -43,6 +43,13 @@ export const createEvent = async (req, res) => {
             brochure
         });
 
+        // Add event to Club Profile
+        const clubProfile = await ClubProfile.findOne({ user: req.user._id });
+        if (clubProfile) {
+            clubProfile.events.push({ event: event._id });
+            await clubProfile.save();
+        }
+
         // Return object with URLs
         const e = event.toObject();
         if (event.poster && event.poster.contentType) e.poster = `api/files/event/${event._id}/poster`;
@@ -232,18 +239,18 @@ export const sponsorEvent = async (req, res) => {
         }
         console.log(user.profile);
         let profile;
-        if(user.role === 'club-admin') profile = await ClubProfile.findById(user.profile);
-        if(user.role === 'company') profile = await CompanyProfile.findById(user.profile);
-        if(user.role === 'alumni-individual') profile = await AlumniProfile.findById(user.profile);
+        if (user.role === 'club-admin') profile = await ClubProfile.findById(user.profile);
+        if (user.role === 'company') profile = await CompanyProfile.findById(user.profile);
+        if (user.role === 'alumni-individual') profile = await AlumniProfile.findById(user.profile);
         if (!profile) {
             return res.status(404).json({ message: 'Profile not found' });
         }
         console.log(profile);
         console.log(profile.name)
-        
+
         const sponsorship = {
             sponsor: user.profile,
-            name: profile.organizationName ? profile.organizationName : profile.name  ? profile.name : "",
+            name: profile.organizationName ? profile.organizationName : profile.name ? profile.name : "",
             amount: Number(amount),
             date: Date.now()
         };
@@ -252,6 +259,13 @@ export const sponsorEvent = async (req, res) => {
         event.raised += Number(amount);
 
         await event.save();
+
+        // Add to Sponsor Profile
+        if (profile) {
+            if (!profile.sponseredEvents) profile.sponseredEvents = [];
+            profile.sponseredEvents.push({ event: event._id });
+            await profile.save();
+        }
 
         res.json({
             message: 'Sponsorship committed successfully',
@@ -281,6 +295,13 @@ export const deleteEvent = async (req, res) => {
         }
 
         await Event.deleteOne({ _id: event._id });
+
+        // Remove from Club Profile
+        const clubProfile = await ClubProfile.findOne({ user: req.user._id });
+        if (clubProfile) {
+            clubProfile.events = clubProfile.events.filter(e => e.event.toString() !== req.params.id);
+            await clubProfile.save();
+        }
 
         res.json({ message: 'Event removed' });
     } catch (error) {
