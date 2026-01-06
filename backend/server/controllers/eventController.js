@@ -291,12 +291,12 @@ export const deleteEvent = async (req, res) => {
         }
 
         // Check ownership
-        if (event.organizer.toString() !== req.user._id.toString() && req.user.role !== 'administrator') {
+        if (event.organizer.toString() !== req.user.profile.toString() && req.user.role !== 'administrator') {
             return res.status(401).json({ message: 'Not authorized to delete this event' });
         }
 
         //Acces Event organizer profile
-        const user = await User.findById(event.organizer);
+        const user = await User.findById(req.user._id);
         const profile = await getUserProfile(user);
         if (!profile) {
             return res.status(404).json({ message: 'Profile not found' });

@@ -40,6 +40,7 @@ const ClubDashboard = () => {
         const fetchData = async () => {
             try {
                 const userData = await getCurrentUser();
+                console.log(userData)
                 if (userData.role !== 'club-admin') {
                     navigate('/login');
                     return;
@@ -53,7 +54,7 @@ const ClubDashboard = () => {
                     console.log(event)
                     if (!event.organizer) return false;
                     const orgId = typeof event.organizer === 'object' ? event.organizer._id : event.organizer;
-                    return orgId === userData._id;
+                    return orgId === userData.profile;
                 });
                 setEvents(myEvents);
                 console.log(myEvents);
@@ -270,7 +271,8 @@ const ClubDashboard = () => {
                                 </button>
                             </div>
                         </div>
-                    ))}
+                    ))} 
+                    
                 </div>
             )}
 
