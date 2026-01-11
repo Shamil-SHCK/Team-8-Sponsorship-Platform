@@ -33,3 +33,13 @@ export const getMyGigs = () => {
 export const acceptGig = (gigId) => {
     return request(`/gigs/${gigId}/accept`, { method: 'PUT' });
 };
+
+// Feature: Get Club's accepted gigs
+export const getAcceptedGigs = () => {
+    return request('/gigs/accepted', { method: 'GET' });
+};
+
+// Feature: Mark gig as complete
+export const markGigComplete = (gigId) => {
+    return request(`/gigs/${gigId}/complete`, { method: 'PUT' });
+};

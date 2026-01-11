@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getCurrentUser, logoutUser, createEvent, getEvents, updateEvent, deleteEvent } from '../services/api';
+import { getAcceptedGigs, markGigComplete } from '../services/api/gigService';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
 import { Rocket, DollarSign, Calendar, Plus, Briefcase, X } from 'lucide-react';
@@ -9,6 +10,7 @@ import CreateEventModal from './CreateEventModal';
 const ClubDashboard = () => {
     const [user, setUser] = useState(null);
     const [events, setEvents] = useState([]);
+    const [acceptedGigs, setAcceptedGigs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [showSponsorsModal, setShowSponsorsModal] = useState(false);
@@ -68,7 +70,13 @@ const ClubDashboard = () => {
                     return idMatch || nameMatch;
                 });
                 console.log('Filtered Events:', myEvents);
+                console.log('Filtered Events:', myEvents);
                 setEvents(myEvents);
+
+                // Fetch Accepted Gigs
+                const gigsData = await getAcceptedGigs();
+                setAcceptedGigs(gigsData);
+
             } catch (error) {
                 console.error('Failed to fetch data', error);
                 logoutUser();
@@ -167,6 +175,72 @@ const ClubDashboard = () => {
     const totalRaised = events.reduce((sum, event) => sum + (event.raised || 0), 0);
     const activeEvents = events.filter(e => new Date(e.date) >= new Date()).length;
 
+    const handleMarkGigDone = async (gigId) => {
+        if (window.confirm('Are you sure you want to mark this gig as done?')) {
+            try {
+                const updatedGig = await markGigComplete(gigId);
+                setAcceptedGigs(acceptedGigs.map(g => g._id === gigId ? { ...g, status: 'completed' } : g));
+            } catch (error) {
+                console.error(error);
+                alert('Failed to update gig status');
+            }
+        }
+    };
+
+    const AcceptedGigsSection = () => (
+        <div className="mb-10">
+            <h2 className="text-2xl font-bold font-heading text-slate-900 mb-6 flex items-center gap-2">
+                <Briefcase className="w-6 h-6 text-indigo-600" />
+                Accepted <span className="text-indigo-600">Gigs</span>
+            </h2>
+
+            {acceptedGigs.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {acceptedGigs.map(gig => (
+                        <div key={gig._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden">
+                            {gig.status === 'completed' && (
+                                <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">
+                                    COMPLETED
+                                </div>
+                            )}
+
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900 line-clamp-1">{gig.title}</h3>
+                                    <p className="text-sm text-slate-500 font-medium">
+                                        by <span className="text-indigo-600">{gig.company?.name || 'Unknown Company'}</span>
+                                    </p>
+                                </div>
+                                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full">
+                                    {gig.category}
+                                </span>
+                            </div>
+
+                            <p className="text-slate-600 text-sm mb-4 line-clamp-2">{gig.description}</p>
+
+                            <div className="flex items-center justify-between mt-auto">
+                                <div className="font-bold text-slate-900">₹{gig.budget.toLocaleString()}</div>
+                                {gig.status !== 'completed' && (
+                                    <button
+                                        onClick={() => handleMarkGigDone(gig._id)}
+                                        className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors"
+                                    >
+                                        Mark Done
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-white p-8 rounded-2xl border border-dashed border-slate-300 text-center">
+                    <p className="text-slate-500">You haven't accepted any gigs yet.</p>
+                    <button onClick={() => navigate('/club/gig-opportunities')} className="text-indigo-600 font-bold hover:underline mt-2">Browse Gigs</button>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <DashboardLayout user={user}>
             <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -227,6 +301,9 @@ const ClubDashboard = () => {
                 handleDeleteEvent={handleDeleteEvent}
                 openCreateModal={() => { setIsEditing(false); setShowModal(true); }}
             />
+
+            {/* Accepted Gigs Section */}
+            <AcceptedGigsSection />
 
             {/* View Sponsors Modal */}
             {showSponsorsModal && selectedEvent && (

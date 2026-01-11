@@ -56,3 +56,31 @@ export const acceptGig = async (req, res) => {
         res.json(gig);
     } catch (err) { res.status(500).json({ error: err.message }); }
 };
+
+// 5. Feature: Get Club's accepted gigs
+export const getAcceptedGigs = async (req, res) => {
+    try {
+        const gigs = await Gig.find({ assignedClub: req.user.id })
+            .populate('company', 'name email profile profileType') // Populate company details
+            .sort({ createdAt: -1 });
+        res.json(gigs);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+// 6. Feature: Mark gig as done
+export const markGigComplete = async (req, res) => {
+    try {
+        const gig = await Gig.findById(req.params.id);
+        if (!gig) return res.status(404).json({ msg: 'Gig not found' });
+
+        // Ensure only the assigned club can mark it as done
+        if (gig.assignedClub.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'Not authorized' });
+        }
+
+        gig.status = 'completed';
+        await gig.save();
+
+        res.json(gig);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+};
