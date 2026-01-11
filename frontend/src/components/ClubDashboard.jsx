@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getCurrentUser, logoutUser, createEvent, getEvents, updateEvent, deleteEvent } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
-import { Rocket, DollarSign, Calendar, Plus } from 'lucide-react';
+import { Rocket, DollarSign, Calendar, Plus, Briefcase, X } from 'lucide-react';
 import ClubEventList from './ClubEventList';
 import CreateEventModal from './CreateEventModal';
 
@@ -176,12 +176,20 @@ const ClubDashboard = () => {
                     </h1>
                     <p className="text-slate-500 text-lg">Manage your events and sponsorships.</p>
                 </div>
-                <button
-                    onClick={() => { setIsEditing(false); setShowModal(true); }}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:-translate-y-1 transition-all"
-                >
-                    <Plus className="w-5 h-5" /> New Event
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => navigate('/club/gig-opportunities')}
+                        className="flex items-center gap-2 px-6 py-3 bg-white text-indigo-600 font-bold rounded-xl shadow-sm border border-indigo-100 hover:bg-indigo-50 hover:-translate-y-1 transition-all"
+                    >
+                        <Briefcase className="w-5 h-5" /> Find Gigs
+                    </button>
+                    <button
+                        onClick={() => { setIsEditing(false); setShowModal(true); }}
+                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:-translate-y-1 transition-all"
+                    >
+                        <Plus className="w-5 h-5" /> New Event
+                    </button>
+                </div>
             </div>
 
             {/* Stats Grid */}
