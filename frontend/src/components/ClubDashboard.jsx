@@ -188,7 +188,7 @@ const ClubDashboard = () => {
     };
 
     const AcceptedGigsSection = () => (
-        <div className="mb-10">
+        <div className="mb-10 mt-16 pt-10 border-t border-slate-100">
             <h2 className="text-2xl font-bold font-heading text-slate-900 mb-6 flex items-center gap-2">
                 <Briefcase className="w-6 h-6 text-indigo-600" />
                 Accepted <span className="text-indigo-600">Gigs</span>
@@ -197,7 +197,7 @@ const ClubDashboard = () => {
             {acceptedGigs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {acceptedGigs.map(gig => (
-                        <div key={gig._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden">
+                        <div key={gig._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden flex flex-col">
                             {gig.status === 'completed' && (
                                 <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">
                                     COMPLETED
@@ -206,24 +206,24 @@ const ClubDashboard = () => {
 
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h3 className="text-lg font-bold text-slate-900 line-clamp-1">{gig.title}</h3>
+                                    <h3 className="text-lg font-bold text-slate-900 line-clamp-1 mb-1">{gig.title}</h3>
                                     <p className="text-sm text-slate-500 font-medium">
                                         by <span className="text-indigo-600">{gig.company?.name || 'Unknown Company'}</span>
                                     </p>
                                 </div>
-                                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full">
+                                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full text-nowrap ml-2">
                                     {gig.category}
                                 </span>
                             </div>
 
-                            <p className="text-slate-600 text-sm mb-4 line-clamp-2">{gig.description}</p>
+                            <p className="text-slate-600 text-sm mb-6 line-clamp-2 leading-relaxed">{gig.description}</p>
 
-                            <div className="flex items-center justify-between mt-auto">
-                                <div className="font-bold text-slate-900">₹{gig.budget.toLocaleString()}</div>
+                            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
+                                <div className="font-bold text-slate-900 text-lg">₹{gig.budget.toLocaleString()}</div>
                                 {gig.status !== 'completed' && (
                                     <button
                                         onClick={() => handleMarkGigDone(gig._id)}
-                                        className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors"
+                                        className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors shadow-sm shadow-green-200"
                                     >
                                         Mark Done
                                     </button>
@@ -294,13 +294,19 @@ const ClubDashboard = () => {
             </div>
 
             {/* Event List */}
-            <ClubEventList
-                events={events}
-                handleViewSponsors={handleViewSponsors}
-                handleEditEvent={handleEditEvent}
-                handleDeleteEvent={handleDeleteEvent}
-                openCreateModal={() => { setIsEditing(false); setShowModal(true); }}
-            />
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold font-heading text-slate-900 mb-6 flex items-center gap-2">
+                    <Calendar className="w-6 h-6 text-indigo-600" />
+                    Your <span className="text-indigo-600">Events</span>
+                </h2>
+                <ClubEventList
+                    events={events}
+                    handleViewSponsors={handleViewSponsors}
+                    handleEditEvent={handleEditEvent}
+                    handleDeleteEvent={handleDeleteEvent}
+                    openCreateModal={() => { setIsEditing(false); setShowModal(true); }}
+                />
+            </div>
 
             {/* Accepted Gigs Section */}
             <AcceptedGigsSection />
